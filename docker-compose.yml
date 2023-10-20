@@ -1,0 +1,107 @@
+version: '2'
+services:
+#  nginx:
+#    image: nginx:alpine
+#    container_name: nginx
+#    restart: unless-stopped
+#    ports:
+#      - 80:80
+#    volumes:
+#      - ./:/var/www
+#      - ./nginx:/etc/nginx/conf.d/
+#    tty: true
+  db:
+      image: mysql:5.7
+      container_name: mysqldb
+      environment:
+          # with mysql
+          MYSQL_DATABASE: test_db
+          # MYSQL_USER: wonderwoman
+          MYSQL_ROOT_PASSWORD: wonder
+      volumes:
+          - ./data/mysql:/var/lib/mysql
+      ports:
+          - "3312:3306"
+      networks:
+       external_network:
+         aliases:
+            - mysqldb
+  redis:
+    image: redis:3.2
+    container_name: redisdb
+    volumes:
+        - ./data/redis:/data
+    ports:
+        - "6379:6379"
+    command: redis-server --appendonly yes
+    networks:
+      external_network:
+          aliases:
+            - redisdb
+  elasticsearch:
+    image: elasticsearch:2.4.4
+    container_name: elasticsearch
+    volumes:
+        - ./data/elasticsearch:/usr/share/elasticsearch/data
+    ports:
+        - "9200:9200"
+    networks:
+          external_network:
+              aliases:
+                - elasticsearch
+  rabbitmq:
+    image: rabbitmq:3.8.14
+    container_name: rabbitmq
+    volumes:
+      - ./data/rabbitmq:/etc/rabbitmq/
+    ports:
+      - "15672:15672"
+      - "4369:4369"
+      - "5672:5672"
+      - "25672:25672"
+      - "5671:5671"
+    environment:
+          RABBITMQ_ERLANG_COOKIE: "SWQOKODSQALRPCLNMEQG"
+          RABBITMQ_DEFAULT_USER: "rabbitmq"
+          RABBITMQ_DEFAULT_PASS: "rabbitmq"
+          RABBITMQ_DEFAULT_VHOST: "/"
+    networks:
+          external_network:
+              aliases:
+                - rabbitmq
+  selenium:
+    container_name: selenium
+    image: selenium/standalone-chrome
+    ports:
+      - "4444"
+    networks:
+          external_network:
+              aliases:
+                - selenium
+  postgres:
+    image: postgres
+    container_name: postgresdb
+    ports:
+      - "5432:5432"
+    networks:
+      external_network:
+        aliases:
+          - postgresdb
+    environment:
+      - POSTGRES_PASSWORD=marketplace
+    volumes:
+      - ./data/postgresql:/var/lib/postgresql
+
+  mongodb:
+    image: bitnami/mongodb:3.6.5-r12
+    container_name: mongodb
+    volumes:
+      - ./data/mongodb:/bitnami
+    ports:
+      - "27017:27017"
+    networks:
+      external_network:
+        aliases:
+          - mongodb
+networks:
+  external_network:
